@@ -233,7 +233,7 @@ GLOBAL_LIST_INIT(available_ui_styles, sortList(list(
 	if(!screenmob.client)
 		return FALSE
 
-	update_colorblind_hud_palette(screenmob.client?.prefs)
+	update_colorblind_hud_palette(mymob.client?.prefs)
 
 	screenmob.client.screen = list()
 	screenmob.client.apply_clickcatcher()
@@ -361,8 +361,13 @@ GLOBAL_LIST_INIT(available_ui_styles, sortList(list(
 
 	for(var/screen_item as anything in screen_objects)
 		var/atom/movable/screen/screen_object = screen_item
-		if(istype(screen_object))
-			screen_object.apply_colorblind_hud_palette(prefs)
+		if(!istype(screen_object))
+			continue
+		// client.screen can carry screen objects belonging to other mobs' HUDs (observed players,
+		// shared storage UIs) — recoloring those would push our palette onto their owners' screens.
+		if(screen_object.hud && screen_object.hud != src)
+			continue
+		screen_object.apply_colorblind_hud_palette(prefs)
 
 /client/proc/refresh_colorblind_hud_palette()
 	if(!prefs || !mob?.hud_used)
