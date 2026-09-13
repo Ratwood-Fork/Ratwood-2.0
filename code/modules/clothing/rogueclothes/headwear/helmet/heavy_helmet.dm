@@ -363,7 +363,7 @@
 		altdetail_color = GLOB.colorlist[choicealt]
 		altdetail_tag = "_detailalt"
 		if(choicealt in GLOB.pridelist)
-			detail_tag = "_detailp"
+			altdetail_tag = "_detailaltp"
 		update_icon()
 		if(loc == user && ishuman(user))
 			var/mob/living/carbon/H = user

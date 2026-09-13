@@ -271,6 +271,17 @@
 	desc = "An iron 'sallet'-styled helmet with an adjustable visor, its bevor drawn forward into a muzzle. Favored by those with snouts. Out for a stroll, now, are we?"
 	icon_state = "isallet_visor_s"
 
+/// The raised visor hides part of the plume, so these keep their own raised visor overlays
+/obj/item/clothing/head/roguetown/helmet/sallet/visored/snouted/get_detail_state(base_state)
+	if(base_state == "[initial(icon_state)]_t")
+		return base_state
+	return ..()
+
+/obj/item/clothing/head/roguetown/helmet/sallet/visored/iron/snouted/get_detail_state(base_state)
+	if(base_state == "[initial(icon_state)]_t")
+		return base_state
+	return ..()
+
 /obj/item/clothing/head/roguetown/helmet/sallet/elven
 	desc = "A steel helmet with a thin gold plating designed for Elven woodland guardians."
 	icon_state = "bascinet_novisor"
