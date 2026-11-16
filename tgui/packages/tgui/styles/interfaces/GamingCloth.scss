@@ -1,0 +1,736 @@
+// The felt is its own green panel, everything else takes the theme's colours
+$felt-light: #3f7a4c;
+$felt-mid: #2c5a37;
+$felt-dark: #1b3a24;
+$felt-edge: #4a2f17;
+$card-paper: #f3ecdc;
+$card-ink: #1f1a17;
+$card-red: #b0221b;
+$card-margin: #eee3c8;
+$side-width: 210px;
+$label-column: 80px;
+$label-row: 48px;
+// HAND_CARD_WIDTH in GamingCloth/Hand.tsx
+$hand-card-w: 62px;
+
+// The gallery's leap and wiggle on hover, on the face's own translate, scale and rotate,
+// which add to the transform the flip uses
+@keyframes GamingCloth__leap {
+  0% {
+    translate: 0 0;
+    scale: 1;
+    rotate: 0deg;
+  }
+  40% {
+    translate: 0 -30px;
+    scale: 1.24;
+    rotate: -6deg;
+  }
+  58% {
+    translate: 0 -25px;
+    scale: 1.2;
+    rotate: 5deg;
+  }
+  76% {
+    translate: 0 -23px;
+    scale: 1.2;
+    rotate: -3deg;
+  }
+  90% {
+    translate: 0 -22px;
+    scale: 1.2;
+    rotate: 1.5deg;
+  }
+  100% {
+    translate: 0 -22px;
+    scale: 1.2;
+    rotate: 0deg;
+  }
+}
+
+// A distinct name starts the drop when hover ends instead of continuing the leap
+@keyframes GamingCloth__drop {
+  0% {
+    translate: 0 -22px;
+    scale: 1.2;
+    rotate: 0deg;
+  }
+  55% {
+    translate: 0 -4px;
+    scale: 1.04;
+    rotate: 2.5deg;
+  }
+  80% {
+    translate: 0 -1px;
+    scale: 1.01;
+    rotate: -1.5deg;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+// The gallery's wiggle on becoming selected. The lift wrapper does the rising
+@keyframes GamingCloth__picked {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  30% {
+    rotate: -6deg;
+  }
+  50% {
+    rotate: 5deg;
+  }
+  70% {
+    rotate: -3deg;
+  }
+  85% {
+    rotate: 1.5deg;
+  }
+}
+
+// The gallery's hop on becoming selected, from the pose of a card leaping on hover
+@keyframes GamingCloth__leapPicked {
+  0% {
+    translate: 0 -22px;
+    scale: 1.2;
+    rotate: 0deg;
+  }
+  30% {
+    translate: 0 -14px;
+    scale: 1.1;
+    rotate: -6deg;
+  }
+  50% {
+    translate: 0 -12px;
+    scale: 1.1;
+    rotate: 5deg;
+  }
+  70% {
+    translate: 0 -6px;
+    scale: 1.05;
+    rotate: -3deg;
+  }
+  85% {
+    translate: 0 -2px;
+    scale: 1;
+    rotate: 1.5deg;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes GamingCloth__candle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  18% {
+    opacity: 0.66;
+  }
+  31% {
+    opacity: 0.9;
+  }
+  47% {
+    opacity: 0.55;
+  }
+  63% {
+    opacity: 0.85;
+  }
+  81% {
+    opacity: 0.62;
+  }
+}
+
+// Explicit at both ends, as an implied end would take the card's resting opacity
+@keyframes GamingCloth__fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes GamingCloth__fadeUp {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.GamingCloth {
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  display: flex;
+  height: 100%;
+  padding: 6px;
+  gap: 6px;
+  user-select: none;
+}
+
+.GamingCloth__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.GamingCloth__side {
+  width: $side-width;
+  flex-shrink: 0;
+}
+
+// The table's box sizes the felt as the largest square that fits beside its labels.
+// Its backdrop is a pool of candlelight under the felt, the warm light of the gallery's
+// tavern table, faint enough that the seat labels read on every theme. --gc-backdrop
+// scales it, 0 for none, and is never set by the window itself
+.GamingCloth__tableArea {
+  flex: 1;
+  min-height: 0;
+  container-type: size;
+  background: radial-gradient(
+    ellipse 58% 62% at 50% 50%,
+    rgba(255, 150, 70, calc(0.16 * var(--gc-backdrop, 1))) 0%,
+    rgba(255, 130, 60, calc(0.07 * var(--gc-backdrop, 1))) 55%,
+    transparent 78%
+  );
+}
+
+.GamingCloth__table {
+  --felt: max(
+    120px,
+    min(calc(100cqw - #{2 * $label-column}), calc(100cqh - #{2 * $label-row}))
+  );
+  height: 100%;
+  display: grid;
+  grid-template-columns: $label-column var(--felt) $label-column;
+  grid-template-rows: $label-row var(--felt) $label-row;
+  grid-template-areas:
+    '. top .'
+    'left felt right'
+    '. bottom .';
+  justify-content: center;
+  align-content: center;
+}
+
+// Felt units are tenths of a container unit here, so everything on it scales with the box.
+// The edge is a shadow outside the box, since a border would move the felt units off the
+// box that pointer maths measures
+.GamingCloth__felt {
+  grid-area: felt;
+  position: relative;
+  container-type: size;
+  border-radius: 4px;
+  background-color: $felt-mid;
+  background-image:
+    radial-gradient(
+      ellipse at 50% 42%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      $felt-light 0%,
+      $felt-mid 55%,
+      $felt-dark 100%
+    );
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.45),
+    0 0 0 5px $felt-edge,
+    0 0 0 6px rgba(0, 0, 0, 0.6),
+    0 3px 10px 4px rgba(0, 0, 0, 0.55);
+}
+
+// The gallery's candle glow, under the cards so the vignette never darkens a face.
+// --gc-glow scales it, 0 for none, and is never set by the window itself. Still at rest,
+// so it costs nothing after it is first drawn
+.GamingCloth__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 150, 70, calc(0.3 * var(--gc-glow, 0.5))) 0%,
+      rgba(255, 130, 50, calc(0.14 * var(--gc-glow, 0.5))) 42%,
+      transparent 66%
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 48%,
+      rgba(24, 9, 2, calc(0.6 * var(--gc-glow, 0.5))) 78%,
+      rgba(8, 3, 0, calc(0.95 * var(--gc-glow, 0.5))) 100%
+    );
+}
+
+// Opacity alone, so the compositor plays it with no script per frame
+.GamingCloth__glow--stirring {
+  animation: GamingCloth__candle 1.6s ease-in-out infinite;
+}
+
+.GamingCloth__layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.GamingCloth__anchor,
+.GamingCloth__arrival,
+.GamingCloth__turn,
+.GamingCloth__lift,
+.GamingCloth__leaving {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+
+.GamingCloth__anchor {
+  transition: transform 220ms ease-out;
+}
+
+// The face is the lift wrapper's only child, centred on the anchor point
+.GamingCloth__lift > *,
+.GamingCloth__leaving > * {
+  position: absolute;
+  left: calc(var(--card-w) * -0.5);
+  top: calc(var(--card-w) * -0.7);
+  pointer-events: auto;
+}
+
+// Down in 120 ms. Up in 160 ms on the gallery's wheel curve, whose overshoot is the settle
+.GamingCloth__lift {
+  transition: transform 120ms ease-out;
+}
+
+// A perspective of 1.5 card widths, so a 7 degree lean grows the near edge about 4%,
+// as the gallery's 1400 px does on a 936 px picture. Only while up, as a resting card
+// turning over would look stretched through it
+.GamingCloth__lift--up {
+  --card-shadow: 0 5px 14px rgba(0, 0, 0, 0.6);
+  transition: transform 160ms cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+.GamingCloth__layer .GamingCloth__lift--up {
+  perspective: 13.5cqw;
+}
+
+.GamingCloth__fan .GamingCloth__lift--up {
+  perspective: $hand-card-w * 1.5;
+}
+
+// The resting box of a hand card takes the hover and the click, so a card that leaps
+// up out of it on hover still has the pointer and does not drop back at once
+.GamingCloth__fan .GamingCloth__lift::before {
+  position: absolute;
+  left: $hand-card-w * -0.5;
+  top: $hand-card-w * -0.7;
+  width: $hand-card-w;
+  height: $hand-card-w * 1.4;
+  content: '';
+  pointer-events: auto;
+}
+
+.GamingCloth__leaving {
+  animation: GamingCloth__fadeOut 0.3s ease-in both;
+}
+
+.GamingCloth__leaving > * {
+  pointer-events: none;
+}
+
+.GamingCloth__card,
+.GamingCloth__deck {
+  width: var(--card-w);
+  height: calc(var(--card-w) * 1.4);
+  border-radius: calc(var(--card-w) * 0.08);
+}
+
+// The tilt's ease runs on the compositor with no script per frame, the gallery's curve
+.GamingCloth__card {
+  position: relative;
+  overflow: hidden;
+  background-color: $card-paper;
+  box-shadow: var(--card-inset, 0 0 0 0 transparent), var(--card-shadow);
+  font-family: Georgia, 'Times New Roman', serif;
+  color: $card-ink;
+  line-height: 1;
+  transition: rotate 0.15s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.GamingCloth__card--felt,
+.GamingCloth__deck {
+  --card-w: 9cqw;
+}
+
+.GamingCloth__card--hand {
+  --card-w: #{$hand-card-w};
+}
+
+.GamingCloth__motion--leap {
+  animation: GamingCloth__leap 0.46s ease-out both;
+}
+
+.GamingCloth__motion--drop {
+  animation: GamingCloth__drop 0.12s ease-out both;
+}
+
+.GamingCloth__motion--picked {
+  animation: GamingCloth__picked 0.5s ease-out both;
+}
+
+.GamingCloth__motion--leapPicked {
+  animation: GamingCloth__leapPicked 0.5s ease-out both;
+}
+
+.GamingCloth__card--mini {
+  --card-w: 26px;
+  --card-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+@mixin card-back($colour) {
+  --card-inset: inset 0 0 0 calc(var(--card-w) * 0.06) #{$card-margin};
+  background-color: $colour;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.14) 0 1px,
+      transparent 1px 5px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.14) 0 1px,
+      transparent 1px 5px
+    ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      rgba(255, 255, 255, 0.18),
+      transparent 70%
+    );
+}
+
+.GamingCloth__back--plain {
+  @include card-back(#2a4a75);
+}
+
+.GamingCloth__back--syndicate {
+  @include card-back(#7d2222);
+}
+
+.GamingCloth__back--tarot {
+  @include card-back(#43306e);
+}
+
+.GamingCloth__face--red {
+  color: $card-red;
+}
+
+.GamingCloth__corner {
+  position: absolute;
+  left: calc(var(--card-w) * 0.05);
+  top: calc(var(--card-w) * 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: calc(var(--card-w) * 0.24);
+  font-weight: bold;
+}
+
+.GamingCloth__corner--far {
+  left: auto;
+  top: auto;
+  right: calc(var(--card-w) * 0.05);
+  bottom: calc(var(--card-w) * 0.05);
+  transform: rotate(180deg);
+}
+
+.GamingCloth__suit,
+.GamingCloth__pip {
+  font-family: 'Segoe UI Symbol', 'DejaVu Sans', sans-serif;
+}
+
+.GamingCloth__suit {
+  font-size: 0.85em;
+}
+
+.GamingCloth__pip {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--card-w) * 0.5);
+}
+
+.GamingCloth__text {
+  position: absolute;
+  inset: calc(var(--card-w) * 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  border: 1px solid rgba(31, 26, 23, 0.3);
+  border-radius: calc(var(--card-w) * 0.05);
+  font-size: calc(var(--card-w) * 0.17);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.GamingCloth__card--mini .GamingCloth__corner {
+  font-size: calc(var(--card-w) * 0.4);
+}
+
+.GamingCloth__card--mini .GamingCloth__text {
+  font-size: calc(var(--card-w) * 0.22);
+}
+
+.GamingCloth__deck {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    var(--card-inset, 0 0 0 0 transparent),
+    1px 1px 0 #d8cdb3,
+    2px 2px 0 #8e8572,
+    3px 3px 0 #d8cdb3,
+    4px 4px 0 #8e8572,
+    0 4px 10px rgba(0, 0, 0, 0.55);
+}
+
+.GamingCloth__deck--empty {
+  background: transparent;
+  box-shadow: none;
+  border: 2px dashed rgba(255, 255, 255, 0.35);
+}
+
+.GamingCloth__deckCount {
+  padding: 0 0.3em;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #f6efdc;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: calc(var(--card-w) * 0.3);
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.GamingCloth__seat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.GamingCloth__seat--top {
+  grid-area: top;
+  padding-bottom: 6px;
+}
+
+.GamingCloth__seat--bottom {
+  grid-area: bottom;
+  padding-top: 6px;
+}
+
+.GamingCloth__seat--left,
+.GamingCloth__seat--right {
+  flex-direction: column;
+  padding: 0 4px;
+}
+
+.GamingCloth__seat--left {
+  grid-area: left;
+  padding-right: 10px;
+}
+
+.GamingCloth__seat--right {
+  grid-area: right;
+  padding-left: 10px;
+}
+
+.GamingCloth__seat--empty {
+  opacity: 0.55;
+}
+
+.GamingCloth__seatText {
+  min-width: 0;
+  max-width: 100%;
+  text-align: center;
+}
+
+.GamingCloth__seatName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.GamingCloth__seatInfo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--color-label);
+}
+
+.GamingCloth__tag {
+  padding: 0 3px;
+  border: 1px solid var(--section-separator-color);
+  border-radius: 3px;
+}
+
+// Parchment themes give a darker amber that reads on their light ground
+.GamingCloth__tag--away {
+  color: var(--p-seal-amber, #c9a227);
+  border-color: currentColor;
+}
+
+.GamingCloth__minis {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.GamingCloth__minis > * + * {
+  margin-left: calc(var(--mini-step) - var(--card-w));
+}
+
+.GamingCloth__minis--column {
+  flex-direction: column;
+}
+
+.GamingCloth__minis--column > * + * {
+  margin-left: 0;
+  margin-top: calc(var(--mini-step) - var(--card-w) * 1.4);
+}
+
+.GamingCloth__strip {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 2px 0;
+}
+
+.GamingCloth__hand {
+  flex-shrink: 0;
+  display: flex;
+  height: 112px;
+  border-top: 1px solid var(--section-separator-color);
+}
+
+.GamingCloth__fan {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+// Cards slide along the fan's arc to their new spots on the gallery's wheel curve
+.GamingCloth__fanSpot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transition: transform 0.28s cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+.GamingCloth__handNote {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-label);
+  opacity: 0.7;
+}
+
+.GamingCloth__handButtons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 4px;
+}
+
+.GamingCloth__seatList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.GamingCloth__seatRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.GamingCloth__seatNumber {
+  width: 12px;
+  text-align: right;
+  color: var(--color-label);
+}
+
+.GamingCloth__seatRowName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.GamingCloth__seatRowName--empty {
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.GamingCloth__logLine {
+  padding: 2px 0;
+  border-bottom: 1px solid var(--section-separator-color);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.GamingCloth__logEmpty {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+// Hops and the hover leap become a short fade, and nothing slides or leans. Arrivals
+// fade in useEvents, and the flicker and the tilt never start
+@media (prefers-reduced-motion: reduce) {
+  .GamingCloth__anchor,
+  .GamingCloth__lift,
+  .GamingCloth__fanSpot,
+  .GamingCloth__card {
+    transition: none;
+  }
+
+  .GamingCloth__motion--leap,
+  .GamingCloth__motion--drop,
+  .GamingCloth__motion--picked,
+  .GamingCloth__motion--leapPicked {
+    animation: none;
+  }
+
+  .GamingCloth__lift--up > .GamingCloth__card {
+    animation: GamingCloth__fadeUp 0.3s ease-out;
+  }
+}

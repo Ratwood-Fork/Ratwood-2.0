@@ -125,7 +125,9 @@
 		if(card_table_mode)
 			. += span_smallnotice("It is set up as a card table. Click it to play, or right-click it to pack it up once everyone has left.")
 		else
-			. += span_smallnotice("Right-click it to set it up as a card table for blackjack or poker.")
+			. += span_smallnotice("Right-click it to set up a card table for blackjack or poker, or to lay out a gaming cloth for any game.")
+	else
+		. += span_smallnotice("Right-click it to lay out a gaming cloth for any game.")
 
 /obj/item/toy/cards/deck/Initialize(mapload)
 	. = ..()

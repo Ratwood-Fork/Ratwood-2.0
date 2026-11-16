@@ -88,6 +88,7 @@
 #include "anchored_mobs.dm"
 #include "anvil_recipes.dm"
 #include "baseturfs.dm"
+#include "card_game.dm"
 #include "colorblind_hud_palette.dm"
 #include "component_tests.dm"
 #include "create_and_destroy.dm"

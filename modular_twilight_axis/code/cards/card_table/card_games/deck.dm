@@ -67,8 +67,13 @@
 		return leave_card_table_mode(user)
 	// Tarot decks aren't playing cards, so they can't become card tables.
 	if(istype(src, /obj/item/toy/cards/deck/tarot))
-		return ..()
-	enter_card_table_mode(user)
+		lay_gaming_cloth(user, src)
+		return TRUE
+	switch(pick_table_kind(user))
+		if(GAMING_CLOTH_PICK_TABLE)
+			enter_card_table_mode(user)
+		if(GAMING_CLOTH_PICK_CLOTH)
+			lay_gaming_cloth(user, src)
 	return TRUE
 
 /obj/item/toy/cards/deck/ui_state(mob/user)
